@@ -7,19 +7,106 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TransactionType {
-  income
-  expense
-  internalTransaction
+model account {
+  id                                       Int           @id(map: "accounts_pkey") @default(autoincrement())
+  name                                     String        @unique(map: "accounts_name_key") @db.VarChar(50)
+  description                              String
+  is_active                                Boolean?      @default(true)
+  created                                  DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by                               String?       @db.VarChar(50)
+  modified                                 DateTime?     @db.Timestamptz(6)
+  modified_by                              String?       @db.VarChar(50)
+  currency                                 Int?
+  currency_account_currencyTocurrency      currency?     @relation("account_currencyTocurrency", fields: [currency], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_account_currency")
+  transaction_transaction_accountToaccount transaction[] @relation("transaction_accountToaccount")
 }
 
-model Transaction {
-  id           Int      @id @default(autoincrement())
-  date         DateTime
-  description  String
-  category     String
-  account      String
-  mandatory    Boolean
-  amount       Float
-  type         TransactionType
+model category {
+  id                                         Int              @id @default(autoincrement())
+  name                                       String           @unique @db.VarChar(50)
+  emoji                                      String           @db.VarChar(10)
+  type                                       Int
+  is_active                                  Boolean?         @default(true)
+  created                                    DateTime?        @default(now()) @db.Timestamptz(6)
+  created_by                                 String?          @db.VarChar(50)
+  modified                                   DateTime?        @db.Timestamptz(6)
+  modified_by                                String?          @db.VarChar(50)
+  transaction_type                           transaction_type @relation(fields: [type], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_transaction_type")
+  transaction_transaction_categoryTocategory transaction[]    @relation("transaction_categoryTocategory")
+}
+
+model currency {
+  id                                         Int           @id @default(autoincrement())
+  name                                       String        @db.VarChar(50)
+  code                                       String        @unique @db.VarChar(20)
+  is_active                                  Boolean?      @default(true)
+  created                                    DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by                                 String?       @db.VarChar(50)
+  modified                                   DateTime?     @db.Timestamptz(6)
+  modified_by                                String?       @db.VarChar(50)
+  account_account_currencyTocurrency         account[]     @relation("account_currencyTocurrency")
+  transaction_transaction_currencyTocurrency transaction[] @relation("transaction_currencyTocurrency")
+}
+
+model payment_method {
+  id          Int           @id(map: "payment_methods_pkey") @default(autoincrement())
+  name        String        @unique(map: "payment_methods_name_key") @db.VarChar(50)
+  is_active   Boolean?      @default(true)
+  created     DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by  String?       @db.VarChar(50)
+  modified    DateTime?     @db.Timestamptz(6)
+  modified_by String?       @db.VarChar(50)
+  transaction transaction[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model transaction {
+  id                                      Int                @id @default(autoincrement())
+  date                                    DateTime           @db.Timestamptz(6)
+  business                                String
+  category                                Int
+  account                                 Int
+  mandatory                               Boolean            @default(false)
+  amount                                  Decimal            @db.Decimal(12, 2)
+  location                                String?
+  type_id                                 Int
+  status_id                               Int
+  payment_method_id                       Int?
+  notes                                   String?
+  currency                                Int
+  created                                 DateTime           @default(now()) @db.Timestamptz(6)
+  created_by                              String             @db.VarChar(50)
+  modified                                DateTime?          @db.Timestamptz(6)
+  modified_by                             String?            @db.VarChar(50)
+  account_transaction_accountToaccount    account            @relation("transaction_accountToaccount", fields: [account], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_account_number")
+  category_transaction_categoryTocategory category           @relation("transaction_categoryTocategory", fields: [category], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category_type")
+  currency_transaction_currencyTocurrency currency           @relation("transaction_currencyTocurrency", fields: [currency], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_currency")
+  payment_method                          payment_method?    @relation(fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_payment_method")
+  transaction_status                      transaction_status @relation(fields: [status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_status")
+  transaction_type                        transaction_type   @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_transactions_type")
+}
+
+model transaction_status {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique @db.VarChar(50)
+  is_active   Boolean?      @default(true)
+  created     DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by  String?       @db.VarChar(50)
+  modified    DateTime?     @db.Timestamptz(6)
+  modified_by String?       @db.VarChar(50)
+  transaction transaction[]
+
+  @@index([id, name, is_active], map: "transaction_status_id_idx")
+}
+
+model transaction_type {
+  id          Int           @id(map: "transaction_types_pkey") @default(autoincrement())
+  name        String        @unique(map: "transaction_types_name_key") @db.VarChar(50)
+  is_active   Boolean?      @default(true)
+  created     DateTime?     @default(now()) @db.Timestamptz(6)
+  created_by  String?       @db.VarChar(50)
+  modified    DateTime?     @db.Timestamptz(6)
+  modified_by String?       @db.VarChar(50)
+  category    category[]
+  transaction transaction[]
 }

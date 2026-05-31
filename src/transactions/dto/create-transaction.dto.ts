@@ -1,31 +1,53 @@
 import {
   IsBoolean,
   IsDateString,
-  IsEnum,
+  IsInt,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
-import { $Enums } from '@prisma/client';
 
 export class CreateTransactionDto {
   @IsDateString()
   date: string;
 
   @IsString()
-  description: string;
+  @IsNotEmpty()
+  business: string;
 
-  @IsString()
-  category: string;
+  @IsInt()
+  category: number;
 
-  @IsString()
-  account: string;
+  @IsInt()
+  account: number;
 
   @IsBoolean()
   mandatory: boolean;
 
   @IsNumber()
+  @Min(0.01)
   amount: number;
 
-  @IsEnum($Enums.TransactionType)
-  type: $Enums.TransactionType;
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsInt()
+  type_id: number;
+
+  @IsInt()
+  status_id: number;
+
+  @IsOptional()
+  @IsInt()
+  payment_method_id?: number;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsInt()
+  currency: number;
 }

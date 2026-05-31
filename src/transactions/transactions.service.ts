@@ -12,12 +12,19 @@ export class TransactionsService {
     return this.prisma.transaction.create({
       data: {
         date: new Date(dto.date),
-        description: dto.description,
+        business: dto.business,
         category: dto.category,
         account: dto.account,
         mandatory: dto.mandatory,
         amount: dto.amount,
-        type: dto.type,
+        type_id: dto.type_id,
+        status_id: dto.status_id,
+        currency: dto.currency,
+        location: dto.location,
+        payment_method_id: dto.payment_method_id,
+        notes: dto.notes,
+        created: new Date(),
+        created_by: '<USER_ID>', // TODO: replace with actual user ID
       },
     });
   }
@@ -58,4 +65,22 @@ export class TransactionsService {
       },
     });
   }
+
+  // async getBalance() {
+  //   const transactions = await this.prisma.transaction.findMany();
+
+  //   const income = transactions
+  //     .filter((t) => t.type === 'income')
+  //     .reduce((sum, t) => sum + t.amount, 0);
+
+  //   const expense = transactions
+  //     .filter((t) => t.type === 'expense')
+  //     .reduce((sum, t) => sum + t.amount, 0);
+
+  //   return {
+  //     income,
+  //     expense,
+  //     balance: income - expense,
+  //   };
+  // }
 }
