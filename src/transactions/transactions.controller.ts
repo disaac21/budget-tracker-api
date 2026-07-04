@@ -20,6 +20,16 @@ export class TransactionsController {
     return this.transactionsService.findAll();
   }
 
+  @Get('category/:categoryId')
+  findByCategory(@Param('categoryId') categoryId: number) {
+    return this.transactionsService.findByCategory(categoryId);
+  }
+
+  @Get('type/:typeId')
+  findByTypeId(@Param('typeId') typeId: number) {
+    return this.transactionsService.findByTypeId(typeId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.transactionsService.findOne(id);

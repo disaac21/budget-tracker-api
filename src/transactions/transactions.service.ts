@@ -41,6 +41,28 @@ export class TransactionsService {
     });
   }
 
+  findByCategory(categoryId: number) {
+    return this.prisma.transaction.findMany({
+      where: { category: categoryId },
+      include: {
+        category_transaction_categoryTocategory: true,
+        transaction_type: true,
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
+  findByTypeId(typeId: number) {
+    return this.prisma.transaction.findMany({
+      where: { type_id: typeId },
+      include: {
+        category_transaction_categoryTocategory: true,
+        transaction_type: true,
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.transaction.findUnique({
       where: {
