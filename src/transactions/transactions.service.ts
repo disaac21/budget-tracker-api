@@ -31,6 +31,10 @@ export class TransactionsService {
 
   findAll() {
     return this.prisma.transaction.findMany({
+      include: {
+        category_transaction_categoryTocategory: true,
+        transaction_type: true,
+      },
       orderBy: {
         date: 'desc',
       },
