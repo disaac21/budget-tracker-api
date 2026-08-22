@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { transactionSelect, mapTransaction } from './transaction.mapper';
 
 @Injectable()
 export class TransactionsService {
@@ -31,89 +32,56 @@ export class TransactionsService {
 
   async findAll() {
     const transactions = await this.prisma.transaction.findMany({
-      select: {
-        id: true,
-        date: true,
-        business: true,
-        mandatory: true,
-        amount: true,
-        location: true,
-        notes: true,
-        created: true,
-        created_by: true,
-
-        category_transaction_categoryTocategory: {
-          select: {
-            name: true,
-          },
-        },
-
-        account_transaction_accountToaccount: {
-          select: {
-            name: true,
-          },
-        },
-
-        transaction_type: {
-          select: {
-            name: true,
-          },
-        },
-
-        transaction_status: {
-          select: {
-            name: true,
-          },
-        },
-
-        payment_method: {
-          select: {
-            name: true,
-          },
-        },
-
-        currency_transaction_currencyTocurrency: {
-          select: {
-            name: true,
-            code: true,
-          },
-        },
-      },
-
+      select: transactionSelect,
       orderBy: {
         date: 'desc',
       },
     });
+
+    return transactions.map(mapTransaction);
   }
 
-  findByCategory(categoryId: number) {
-    return this.prisma.transaction.findMany({
-      where: { category: categoryId },
-      include: {
-        category_transaction_categoryTocategory: true,
-        transaction_type: true,
+  async findByCategory(categoryId: number) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        category: categoryId,
       },
-      orderBy: { date: 'desc' },
-    });
-  }
-
-  findByTypeId(typeId: number) {
-    return this.prisma.transaction.findMany({
-      where: { type_id: typeId },
-      include: {
-        category_transaction_categoryTocategory: true,
-        transaction_type: true,
+      select: transactionSelect,
+      orderBy: {
+        date: 'desc',
       },
-      orderBy: { date: 'desc' },
     });
+
+    return transactions.map(mapTransaction);
   }
 
-  findOne(id: number) {
-    return this.prisma.transaction.findUnique({
+  async findByTypeId(typeId: number) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        type_id: typeId,
+      },
+      select: transactionSelect,
+      orderBy: {
+        date: 'desc',
+      },
+    });
+
+    return transactions.map(mapTransaction);
+  }
+
+  async findOne(id: number) {
+    const transaction = await this.prisma.transaction.findUnique({
       where: {
         id,
       },
+      select: transactionSelect,
     });
+
+    if (!transaction) {
+      return null;
+    }
+
+    return mapTransaction(transaction);
   }
 
   update(id: number, dto: UpdateTransactionDto) {
@@ -136,22 +104,4 @@ export class TransactionsService {
       },
     });
   }
-
-  // async getBalance() {
-  //   const transactions = await this.prisma.transaction.findMany();
-
-  //   const income = transactions
-  //     .filter((t) => t.type === 'income')
-  //     .reduce((sum, t) => sum + t.amount, 0);
-
-  //   const expense = transactions
-  //     .filter((t) => t.type === 'expense')
-  //     .reduce((sum, t) => sum + t.amount, 0);
-
-  //   return {
-  //     income,
-  //     expense,
-  //     balance: income - expense,
-  //   };
-  // }
 }
