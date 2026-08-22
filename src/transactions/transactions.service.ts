@@ -29,12 +29,57 @@ export class TransactionsService {
     });
   }
 
-  findAll() {
-    return this.prisma.transaction.findMany({
-      include: {
-        category_transaction_categoryTocategory: true,
-        transaction_type: true,
+  async findAll() {
+    const transactions = await this.prisma.transaction.findMany({
+      select: {
+        id: true,
+        date: true,
+        business: true,
+        mandatory: true,
+        amount: true,
+        location: true,
+        notes: true,
+        created: true,
+        created_by: true,
+
+        category_transaction_categoryTocategory: {
+          select: {
+            name: true,
+          },
+        },
+
+        account_transaction_accountToaccount: {
+          select: {
+            name: true,
+          },
+        },
+
+        transaction_type: {
+          select: {
+            name: true,
+          },
+        },
+
+        transaction_status: {
+          select: {
+            name: true,
+          },
+        },
+
+        payment_method: {
+          select: {
+            name: true,
+          },
+        },
+
+        currency_transaction_currencyTocurrency: {
+          select: {
+            name: true,
+            code: true,
+          },
+        },
       },
+
       orderBy: {
         date: 'desc',
       },
